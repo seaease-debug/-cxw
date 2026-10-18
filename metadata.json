@@ -1,0 +1,7 @@
+{
+  "name": "科技信息中心资产平台-集成企业微信",
+  "description": "A comprehensive school fixed asset management platform featuring life-cycle tracking and 8-year scrap countdowns.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

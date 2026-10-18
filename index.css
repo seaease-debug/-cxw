@@ -1,0 +1,312 @@
+@import "tailwindcss" source(none);
+
+/* ── 内容来源白名单（关闭 Tailwind 的自动内容识别）──────────────────────
+ * 为什么必须关掉自动识别：Tailwind v4 默认扫全项目（只跳过 .gitignore 命中的路径），
+ * 而本项目根目录长期堆积 60 份审计/文档产物、20+ 个历史 zip、以及历批验收脚本，
+ * .eng-audit/ 下还有历届解包参照。这些文件里的类名字面量会被当成源码，
+ * **重新生成进生产 CSS**。
+ * 实测（修复前）：产物 CSS 里出现了设计规范明令禁止的色规则
+ * （蓝系 50 号浅底、emerald 500 文字色各 1 条），来源是 .eng-audit/ 下的历史拷贝
+ * 与根目录文档 —— 属 DESIGN-CLEAN-1 批已清掉、又在产物里复活的东西。
+ * 改用白名单后，产物 CSS 只由**真正的应用源码**决定。
+ *
+ * ★ 曾试过「只黑名单掉 .eng-audit/ 与文档」——**不可靠**：当天就三次踩到
+ *   根目录的验收脚本（verify-b1-*.mjs）与 index.css 自身注释里的字面量被重新生成。
+ *   白名单是唯一可收敛的形态。
+ * ★ 本注释刻意不写完整工具类字面量：index.css 自己也在 `@source` 列表里。
+ * ★ 新增应用源码目录时**必须同步在此登记**，否则该目录下的类不会被生成
+ *   （判定手段：verify-b1-5.mjs 的 G3b 与「渲染类名必须有规则」检查）。
+ */
+@source "./components";
+@source "./lib";
+@source "./routes";
+@source "./services";
+@source "./utils";
+@source "./App.tsx";
+@source "./index.tsx";
+@source "./index.html";
+@source "./index.css";
+@source "./types.ts";
+
+:root {
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-drawer: 1200;
+  --z-drawer-overlay: 1150;
+  --z-modal-overlay: 2000;
+  --z-modal: 2100;
+  --z-modal-top-overlay: 2500;
+  --z-modal-top: 2600;
+  --z-toast: 3000;
+  --z-tooltip: 4000;
+}
+
+/* ─── Dark Mode (class-based toggle) ─────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Design Theme (Tailwind v4) ────────────────────────────── */
+@theme {
+  /* Brand — mineral teal (distinctive, not default AI blue) */
+  --color-brand: oklch(0.50 0.10 200);
+  --color-brand-light: oklch(0.60 0.12 200);
+  --color-brand-dark: oklch(0.38 0.08 200);
+
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", "Noto Sans SC", ui-monospace, "SF Mono", "Cascadia Code", monospace;
+
+  --color-ink: oklch(0.15 0.01 200);
+  --color-muted: oklch(0.50 0.02 200);
+  --color-border: oklch(0.92 0.008 200);
+  --color-surface: oklch(1 0 0);
+  --color-bg: oklch(0.97 0.005 200);
+
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  /* 表单控件边框 —— SC 1.4.11 规定控件边界与相邻颜色须 ≥3:1。
+     输入框底色（亮 slate-50 / 暗 slate-800）与所在容器几乎同色，
+     边框是识别"这是个可输入控件"的唯一视觉信息，因此不能豁免。
+     实测：亮 4.55:1（对 slate-50）· 暗 3.07:1（对 slate-800）
+     ⇒ 明暗共用一个值，不写 dark: 变体。
+     ⚠ 暗态 3.07:1 余量很小，改 slate-800 / slate-900 底色时必须复算。
+     旧值 slate-200 / slate-700 = 1.18:1 / 1.63:1，均不达标。 */
+  --color-field: oklch(0.554 0.046 257.417);
+
+  /* 滚动条拇指（无 Tailwind 等价写法，只能写在这里 —— 令牌层是唯一允许出现色值的地方） */
+  --color-scrollbar: #cbd5e1;
+  --color-scrollbar-dark: #475569;
+
+  /* 登录页玻璃拟态底色（Apple Vision Pro 风格，非 slate 色阶可表达） */
+  --color-glass-surface: rgba(18, 25, 34, 0.60);
+
+  /* 登录页 = 独立视觉域（2026-10-18 裁决）。
+     该域不服从 §4 圆角阶梯（按钮/输入框 8px、弹窗 16px），因为它模拟的是
+     悬浮玻璃面板而非后台操作面：卡片 28px、域内控件 14px，比值 ≈2:1 是刻意保持的
+     同心圆角关系。因此单独立令牌，禁止在域外复用这两档。
+     ⚠ 域内 border-white/10 的低对比度（≈1.15:1）同时获豁免 —— 该域的可识别性
+       由 backdrop-blur + 玻璃底色 + 内发光共同承担，不是靠边框。 */
+  --radius-glass-card: 28px;
+  --radius-glass-field: 14px;
+
+  /* 手机样机外壳 —— 模拟实体设备的物理外形，与设计系统圆角阶梯无关。
+     单独立令牌，避免任意值散落在 JSX 里。 */
+  --radius-device-mock: 50px;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+
+  --z-drawer: 1200;
+  --z-drawer-overlay: 1150;
+}
+
+/* ─── Dark Mode: Override surface variables only ───────────────
+   --color-slate-800/900/950 are deliberately NOT overridden here
+   because they serve double duty: bg-slate-900 (sidebar, must stay
+   dark) and text-slate-900 (headings, must become light). We
+   handle text overrides with direct class rules below.            */
+.dark {
+  --color-white: #0b1421;
+  --color-slate-50: #131d2b;
+  --color-slate-100: #1e293b;
+  --color-slate-200: #334155;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #cbd5e1;
+  --color-slate-500: #cbd5e1;
+  --color-slate-600: #334155;
+  --color-slate-700: #334155;
+}
+
+/* Body background */
+.dark body {
+  background-color: #0b1421;
+}
+
+/* Ensure white and light slate typography remains beautiful and high-contrast in dark mode on deep backgrounds */
+.dark .text-white,
+.dark .hover\:text-white:hover,
+.dark .group-hover\:text-white,
+.dark .active\:text-white:active,
+.dark .focus\:text-white:focus {
+  color: #ffffff;
+}
+
+.dark .text-slate-50, .dark .dark\:text-slate-50 { color: #f8fafc; }
+.dark .text-slate-100, .dark .dark\:text-slate-100 { color: #f1f5f9; }
+.dark .text-slate-200, .dark .dark\:text-slate-200 { color: #e2e8f0; }
+.dark .text-slate-300, .dark .dark\:text-slate-300 { color: #cbd5e1; }
+.dark .text-slate-400, .dark .dark\:text-slate-400 { color: #cbd5e1; }
+.dark .text-slate-500, .dark .dark\:text-slate-500 { color: #cbd5e1; }
+.dark .text-slate-600, .dark .dark\:text-slate-600 { color: #e2e8f0; }
+.dark .text-slate-700, .dark .dark\:text-slate-700 { color: #e2e8f0; }
+.dark .text-slate-800, .dark .dark\:text-slate-800 { color: #f1f5f9; }
+.dark .text-slate-900, .dark .dark\:text-slate-900 { color: #f8fafc; }
+
+.dark .hover\:text-slate-100:hover { color: #f1f5f9; }
+.dark .hover\:text-slate-200:hover { color: #e2e8f0; }
+.dark .hover\:text-slate-300:hover { color: #cbd5e1; }
+.dark .hover\:text-slate-500:hover { color: #cbd5e1; }
+.dark .hover\:text-slate-600:hover { color: #e2e8f0; }
+.dark .hover\:text-slate-700:hover { color: #e2e8f0; }
+.dark .hover\:text-slate-800:hover { color: #f1f5f9; }
+.dark .hover\:text-slate-900:hover { color: #f8fafc; }
+
+.dark .dark\:hover\:text-slate-100:hover { color: #f1f5f9; }
+.dark .dark\:hover\:text-slate-200:hover { color: #e2e8f0; }
+.dark .dark\:hover\:text-slate-300:hover { color: #cbd5e1; }
+
+/* Sidebar — unified dark palette (all share a blue undertone):
+     bg-slate-900  #0a101e  — sidebar panel background
+     hover:bg-slate-800     — nav item hover
+     border-slate-800       — divider lines
+     The text-slate-400 nav items get #8a9bb8 via the variable above. */
+.dark .bg-slate-900 {
+  background-color: #0a101e;
+}
+.dark .hover\:bg-slate-800:hover {
+  background-color: #141d2e;
+}
+.dark .border-slate-800 {
+  border-color: #1a253a;
+}
+
+/* Shadows in dark mode — not variable-driven, need direct rules */
+.dark .shadow-sm { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5); }
+.dark .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4); }
+.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.4); }
+.dark .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5); }
+
+/* Transition for smooth theme switch */
+.dark body,
+.dark * {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ─── Base Styles ────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  font-family: inherit;
+}
+
+html, body, #root {
+  text-rendering: auto;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, select, textarea, optgroup, table, th, td {
+  font-family: inherit;
+}
+
+/* Focus ring consistency */
+/* 移除鼠标/移动端点击闪烁和黑框高亮 */
+button, input, select, textarea, a {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+button:focus, button:active,
+a:focus, a:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+*:focus {
+  outline: none;
+}
+
+/* 仅在键盘Tab导航时显示无障碍焦点框，防止鼠标点击触发外框 */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Scrollbar styling for sidebar and overflow areas */
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.overflow-y-auto::-webkit-scrollbar-track,
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb,
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar);
+  border-radius: 999px;
+}
+.dark .overflow-y-auto::-webkit-scrollbar-thumb,
+.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-dark);
+}
+
+/* ─── Typography Best Practices ────────────────────────────── */
+h1, h2, h3, h4, h5, h6,
+.font-heading,
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Prevent orphaned words in paragraphs */
+p, li, figcaption, blockquote {
+  text-wrap: pretty;
+}
+
+/* ─── Shimmer Loading Animation ────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-slate-100) 25%,
+    var(--color-slate-200) 50%,
+    var(--color-slate-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    #131d2b 25%,
+    #1e293b 50%,
+    #131d2b 75%
+  );
+  background-size: 200% 100%;
+}
+
+
+/* Override teal to match brand oklch hue 200 */
+@theme {
+  --color-teal-50: oklch(0.96 0.02 200);
+  --color-teal-100: oklch(0.92 0.04 200);
+  --color-teal-200: oklch(0.85 0.06 200);
+  --color-teal-300: oklch(0.78 0.08 200);
+  --color-teal-400: oklch(0.70 0.10 200);
+  --color-teal-500: oklch(0.60 0.12 200);
+  --color-teal-600: oklch(0.50 0.10 200);
+  --color-teal-700: oklch(0.38 0.08 200);
+  --color-teal-800: oklch(0.30 0.06 200);
+  --color-teal-900: oklch(0.25 0.04 200);
+  --color-teal-950: oklch(0.18 0.02 200);
+}
+
+@supports not (height: 100dvh) {
+  .h-dvh { height: 100vh; }
+  .min-h-dvh { min-height: 100vh; }
+}

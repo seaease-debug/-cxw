@@ -1,0 +1,68 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Runtime
+assets.db
+*.db
+*.db-journal
+*.zip
+
+# Dev tools
+.claude/
+tmp-*/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Exclude public images as requested by user
+public/logo.png
+public/bg.png
+
+# Engineering audit artifacts
+.eng-audit/raw/
+.eng-audit/tmp/
+.eng-audit/preview*.png
+.eng-audit/sync-log.txt
+.eng-audit/last-lint.log
+
+# Local scratch / packaging leftovers (zipped snapshots, temp copies, db backups)
+.tmp-package/
+.temp_backup/
+*.rar
+*.bak
+*.pre_restore_bak
+
+# Local screenshots / one-off captures
+audit-login.png
+
+# 生成器的临时语法校验产物
+.eng-audit/split-*/.target-check.js
+
+# 等价性对拍的临时副本与基线快照（每次运行都会重建）
+.eng-audit/db-equiv/
+.eng-audit/orig-schema.js
+
+# 远端对齐指令的对照基准（每次从最新 zip 重新提取）
+.eng-audit/align/remote/
+
+# 同步/自愈时的覆盖前留档（每次运行建一个时间戳子目录）
+.eng-audit/overwrite-backup/

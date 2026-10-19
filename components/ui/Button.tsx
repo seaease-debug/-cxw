@@ -17,8 +17,14 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary:
     'bg-brand text-white font-medium shadow-sm hover:bg-brand/90',
+  /**
+   * ★ 按钮边框用**装饰性**浅色（slate-200 / dark slate-700），不用控件令牌 border-field。
+   *   原因：WCAG 1.4.11 的 3:1 只约束「识别控件所必需的可视线」—— 按钮靠**文字标签 + 白底 + 阴影**
+   *   就能被认出，边框只是收边，不属于"必需"，因此不受 3:1 约束；套上 4.55:1 的深边框只会变丑。
+   *   真正需要 border-field 的是**输入框**（框在哪里＝用户要知道往哪儿打字），见 Input.tsx。
+   */
   secondary:
-    'bg-white dark:bg-slate-800 border border-field text-slate-800 dark:text-slate-100 font-medium shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700',
+    'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-medium shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700',
   danger: 'bg-rose-600 text-white font-medium shadow-sm hover:bg-rose-700',
   ghost: 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium',
   link: 'text-teal-600 hover:underline font-medium p-0 h-auto bg-transparent border-none shadow-none active:scale-100',
